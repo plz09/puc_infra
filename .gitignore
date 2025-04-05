@@ -1,0 +1,5 @@
+# Ignorar arquivos e pastas de estado do Terraform
+IaC/puc_iac_deploy/.terraform/
+IaC/puc_iac_deploy/terraform.lock.hcl
+IaC/puc_iac_deploy/terraform.tfstate
+IaC/puc_iac_deploy/terraform.tfstate.backup

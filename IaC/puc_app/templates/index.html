@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload de CSV para S3</title>
+</head>
+<body>
+    <div style="text-align: center;">
+        <h1>PUC</h1>
+        <h2>Upload de Arquivo CSV para o Amazon S3</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required />
+            <br><br>
+            <button type="submit">Enviar CSV</button>
+        </form>
+    </div>
+</body>
+</html>
