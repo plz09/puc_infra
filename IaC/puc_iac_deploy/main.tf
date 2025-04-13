@@ -39,7 +39,7 @@ resource "aws_instance" "puc_api" {
               #!/bin/bash
               sudo yum update -y
               sudo yum install -y python3 python3-pip awscli
-              sudo pip3 install flask boto3 gunicorn
+              sudo pip3 install flask boto3 gunicorn pandas "urllib3<2.0" "prefect<2.0"
               sudo mkdir /puc_app
               sudo aws s3 sync s3://puc-914156456046-bucket /puc_app
               cd /puc_app
