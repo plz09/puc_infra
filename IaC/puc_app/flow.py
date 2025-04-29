@@ -8,6 +8,7 @@ BUCKET = "puc-914156456046-bucket"
 ORIGEM = "uploads/"
 DESTINO = "processed/"
 
+# Essa task lista os arquivos csv no S3
 @task
 def listar_arquivos_csv():
     s3 = boto3.client("s3")
@@ -23,6 +24,7 @@ def listar_arquivos_csv():
         print("Nenhum arquivo CSV encontrado.")
     return arquivos
 
+# Essas task extrai arquivos csv e retorna um dataframe
 @task
 def extrair_csv(s3_key):
     s3 = boto3.client("s3")
@@ -34,12 +36,15 @@ def extrair_csv(s3_key):
     print(f"Extraído: {s3_key} ({len(df)} linhas)")
     return df, nome_arquivo
 
+
+# Essa task transforma a cloluna valor e acrescenta o R$ e formata para o padrao brasileiro
 @task
 def transformar(df):
     df["valor"] = df["valor"].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
     print("Coluna 'valor' formatada com prefixo 'R$'")
     return df
 
+# Essa task carrega de volta para o S3. primeiro salva em memoria com bytesIO e depois carrega na pasta processed
 @task
 def carregar(df, nome_arquivo):
     s3 = boto3.client("s3")
