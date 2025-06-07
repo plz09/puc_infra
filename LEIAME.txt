@@ -10,7 +10,7 @@ docker build -t puc-terraform-image:eixo4 .
 
 # Execute o comando abaixo para criar o container Docker
 
-docker run -dit --name pellizzi-invest_model -v C:\Users\pellizzi\Documents\projetos_iac\puc_infra\IaC:/iac puc-terraform-image:eixo4 /bin/bash
+docker run -dit --name puc_infra_ctn -v C:\Users\pellizzi\Documents\projetos_iac\puc_infra\IaC:/iac puc-terraform-image:eixo4 /bin/bash
 
 
 
