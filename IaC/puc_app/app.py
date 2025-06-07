@@ -12,7 +12,7 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-bucket_name = "puc-914156456046-bucket"
+bucket_name = "puc-pellizzi09-bucket"
 
 @app.route('/')
 def home():

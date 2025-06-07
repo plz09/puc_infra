@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "puc_bucket_flask" {
-  bucket = "puc-914156456046-bucket"
+  bucket = "puc-pellizzi09-bucket"
 
   tags = {
     Name        = "puc Bucket"
@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "puc_bucket_flask" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "aws s3 rm s3://puc-914156456046-bucket --recursive"
+    command = "aws s3 rm s3://puc-pellizzi09-bucket --recursive"
   }
 }
 
@@ -50,16 +50,21 @@ resource "aws_iam_role_policy" "s3_access_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
         Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
         Resource = [
-          "${aws_s3_bucket.puc_bucket_flask.arn}/*",
-          "${aws_s3_bucket.puc_bucket_flask.arn}"
+          "arn:aws:s3:::puc-pellizzi09-bucket",
+          "arn:aws:s3:::puc-pellizzi09-bucket/*"
         ]
       }
     ]
   })
 }
+
 
 resource "aws_iam_role_policy" "cloudwatch_agent_policy" {
   name = "cloudwatch_agent_policy"
@@ -138,10 +143,11 @@ resource "aws_instance" "puc_api" {
 
               pip3 install flask boto3 gunicorn pandas "urllib3<2.0" "prefect<2.0"
 
-              mkdir /puc_app
-              aws s3 sync s3://puc-914156456046-bucket /puc_app
+              mkdir -p /puc_app
+              aws s3 sync s3://puc-pellizzi09-bucket /puc_app
+              chown -R ec2-user:ec2-user /puc_app
               cd /puc_app
-              nohup gunicorn -w 4 -b 0.0.0.0:5000 app:app &
+              nohup gunicorn -w 4 -b 0.0.0.0:5000 app:app > /tmp/gunicorn.log 2>&1 &
 
               cat <<EOT > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
               {
