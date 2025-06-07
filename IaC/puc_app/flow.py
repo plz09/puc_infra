@@ -4,7 +4,7 @@ import boto3
 import pandas as pd
 from io import BytesIO
 
-BUCKET = "puc-914156456046-bucket"
+BUCKET = "puc-pellizzi09-bucket"
 ORIGEM = "uploads/"
 DESTINO = "processed/"
 
