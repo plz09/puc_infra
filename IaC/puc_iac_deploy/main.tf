@@ -9,25 +9,29 @@ resource "aws_s3_bucket" "puc_bucket_flask" {
     Name        = "puc Bucket"
     Environment = "eixo4"
   }
-
+  # Executa um script local (upload_to_s3.sh) logo após a criação do bucket
   provisioner "local-exec" {
     command = "${path.module}/upload_to_s3.sh"
   }
 
+  # Quando o bucket for destruído, apaga todos os arquivos dentro dele
   provisioner "local-exec" {
     when    = destroy
     command = "aws s3 rm s3://puc-pellizzi09-bucket --recursive"
   }
 }
 
+# Cria um grupo de logs no CloudWatch com retenção de 14 dias. Os logs da aplicação serão enviados para cá
 resource "aws_cloudwatch_log_group" "app_logs" {
   name              = "puc-app-log-group"
   retention_in_days = 14
 }
 
+# Define uma role para EC2, permitindo que ela assuma permissões
 resource "aws_iam_role" "ec2_s3_access_role" {
   name = "ec2_s3_access_role"
 
+  # Permite que instâncias EC2 assumam essa role
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -42,10 +46,12 @@ resource "aws_iam_role" "ec2_s3_access_role" {
   })
 }
 
+# Define permissões da EC2 para interagir com o bucket S3
 resource "aws_iam_role_policy" "s3_access_policy" {
   name = "s3_access_policy"
   role = aws_iam_role.ec2_s3_access_role.id
 
+  # Permissões: listar o bucket, ler e enviar arquivos
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -65,7 +71,7 @@ resource "aws_iam_role_policy" "s3_access_policy" {
   })
 }
 
-
+# Permite que a EC2 colete e envie métricas/logs para o CloudWatch
 resource "aws_iam_role_policy" "cloudwatch_agent_policy" {
   name = "cloudwatch_agent_policy"
   role = aws_iam_role.ec2_s3_access_role.id
@@ -88,15 +94,18 @@ resource "aws_iam_role_policy" "cloudwatch_agent_policy" {
   })
 }
 
+# Cria um perfil de instância que associa a role criada à EC2
 resource "aws_iam_instance_profile" "ec2_s3_profile" {
   name = "ec2_s3_profile"
   role = aws_iam_role.ec2_s3_access_role.name
 }
 
+# Define um grupo de segurança para controlar o tráfego de entrada e saída da instância
 resource "aws_security_group" "puc_api_sg" {
   name        = "puc_api_sg"
   description = "Security Group for Flask App in EC2"
 
+  # Libera acesso nas portas 80 (web), 5000 (Flask app) e 22 (SSH)
   ingress {
     description = "HTTP"
     from_port   = 80
@@ -121,6 +130,7 @@ resource "aws_security_group" "puc_api_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Libera todo o tráfego de saída da instância.
   egress {
     description = "All traffic"
     from_port   = 0
@@ -130,9 +140,12 @@ resource "aws_security_group" "puc_api_sg" {
   }
 }
 
+# Cria uma instância EC2 pequena, com AMI Amazon Linux 2
 resource "aws_instance" "puc_api" {
   ami                    = "ami-0a0d9cf81c479446a"
   instance_type          = "t2.micro"
+
+  # Aplica o perfil IAM e o grupo de segurança criado
   iam_instance_profile   = aws_iam_instance_profile.ec2_s3_profile.name
   vpc_security_group_ids = [aws_security_group.puc_api_sg.id]
 
